@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Sales List View - Only show name and payment -->
+        <record id="sales_list_view" model="ir.ui.view">
+            <field name="name">customer.management.sales.list</field>
+            <field name="model">customer.management</field>
+            <field name="arch" type="xml">
+                <list string="Sales Records">
+                    <field name="name"/>
+                    <field name="paid" string="Payment"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Due List View - Show name, phone, due with delete button -->
+        <record id="due_list_view" model="ir.ui.view">
+            <field name="name">customer.management.due.list</field>
+            <field name="model">customer.management</field>
+            <field name="arch" type="xml">
+                <list string="Customer Due Records">
+                    <field name="name"/>
+                    <field name="phone"/>
+                    <field name="due"/>
+                    <button name="unlink" type="object" string="Delete" 
+                            class="btn-secondary" confirm="Are you sure you want to delete this record?"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Dashboard Tree View for Best Customers -->
+        <record id="dashboard_best_list_view" model="ir.ui.view">
+            <field name="name">customer.management.dashboard.best.list</field>
+            <field name="model">customer.management</field>
+            <field name="arch" type="xml">
+                <list string="Best Customers (Most Frequent)" create="false" edit="false" delete="false">
+                    <field name="name"/>
+                    <field name="visit_count" string="Visits"/>
+                    <field name="paid" string="Total Paid"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Dashboard Tree View for Worst Customers -->
+        <record id="dashboard_worst_list_view" model="ir.ui.view">
+            <field name="name">customer.management.dashboard.worst.list</field>
+            <field name="model">customer.management</field>
+            <field name="arch" type="xml">
+                <list string="Worst Customers (Highest Due)" create="false" edit="false" delete="false">
+                    <field name="name"/>
+                    <field name="phone"/>
+                    <field name="due"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Form View for Create/Update -->
+        <record id="customer_form_view" model="ir.ui.view">
+            <field name="name">customer.management.form</field>
+            <field name="model">customer.management</field>
+            <field name="arch" type="xml">
+                <form string="Customer Details">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" placeholder="Enter customer name"/>
+                                <field name="phone" placeholder="Enter phone number"/>
+                            </group>
+                            <group>
+                                <field name="paid"/>
+                                <field name="due"/>
+                                <field name="visit_count" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sales Action -->
+        <record id="sales_action" model="ir.actions.act_window">
+            <field name="name">Sales</field>
+            <field name="res_model">customer.management</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="sales_list_view"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_empty_folder">
+                    No sales records found
+                </p>
+                <p>
+                    Click "Create" to add a new customer.
+                </p>
+            </field>
+        </record>
+
+        <!-- Due Action -->
+        <record id="due_action" model="ir.actions.act_window">
+            <field name="name">Due</field>
+            <field name="res_model">customer.management</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="due_list_view"/>
+            <field name="domain">[('due', '>', 0)]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_empty_folder">
+                    No customers with due amount found
+                </p>
+                <p>
+                    Click "Create" to add a new customer.
+                </p>
+            </field>
+        </record>
+
+        <!-- Dashboard Action - Best Customers -->
+        <record id="dashboard_best_action" model="ir.actions.act_window">
+            <field name="name">Best Customers</field>
+            <field name="res_model">customer.management</field>
+            <field name="view_mode">list</field>
+            <field name="view_id" ref="dashboard_best_list_view"/>
+            <field name="domain">[]</field>
+            <field name="limit">3</field>
+            <field name="context">{'default_order': 'visit_count desc'}</field>
+        </record>
+
+        <!-- Dashboard Action - Worst Customers -->
+        <record id="dashboard_worst_action" model="ir.actions.act_window">
+            <field name="name">Worst Customers</field>
+            <field name="res_model">customer.management</field>
+            <field name="view_mode">list</field>
+            <field name="view_id" ref="dashboard_worst_list_view"/>
+            <field name="domain">[('due', '>', 0)]</field>
+            <field name="limit">3</field>
+            <field name="context">{'default_order': 'due desc'}</field>
+        </record>
+
+        <!-- Main Menu Items -->
+        <menuitem id="customer_main_menu"
+                  name="Customer Management"
+                  sequence="10"/>
+
+        <!-- Sales Menu (renamed from Customers) -->
+        <menuitem id="sales_menu"
+                  name="Sales"
+                  parent="customer_main_menu"
+                  action="sales_action"
+                  sequence="10"/>
+
+        <!-- Due Menu -->
+        <menuitem id="due_menu"
+                  name="Due"
+                  parent="customer_main_menu"
+                  action="due_action"
+                  sequence="20"/>
+
+        <!-- Dashboard Menu -->
+        <menuitem id="dashboard_main_menu"
+                  name="Dashboard"
+                  parent="customer_main_menu"
+                  sequence="30"/>
+
+        <!-- Dashboard Sub-menus -->
+        <menuitem id="dashboard_best_menu"
+                  name="Best Customers"
+                  parent="dashboard_main_menu"
+                  action="dashboard_best_action"
+                  sequence="10"/>
+
+        <menuitem id="dashboard_worst_menu"
+                  name="Worst Customers"
+                  parent="dashboard_main_menu"
+                  action="dashboard_worst_action"
+                  sequence="20"/>
+
+        <!-- Dashboard Form View for Total Earnings -->
+        <record id="dashboard_summary_form" model="ir.ui.view">
+            <field name="name">dashboard.summary.form</field>
+            <field name="model">customer.management</field>
+            <field name="arch" type="xml">
+                <form string="Dashboard Summary" create="false" edit="false" delete="false">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="paid" string="Total Earnings" widget="monetary"/>
+                            </h1>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Total Earnings Action -->
+        <record id="total_earnings_action" model="ir.actions.act_window">
+            <field name="name">Total Earnings</field>
+            <field name="res_model">customer.management</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="dashboard_summary_form"/>
+            <field name="target">new</field>
+        </record>
+
+        <!-- Total Earnings Menu -->
+        <menuitem id="total_earnings_menu"
+                  name="Total Earnings"
+                  parent="dashboard_main_menu"
+                  action="total_earnings_action"
+                  sequence="30"/>
+
+    </data>
+</odoo>
